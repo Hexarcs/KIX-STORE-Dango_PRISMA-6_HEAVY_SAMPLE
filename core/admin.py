@@ -115,3 +115,29 @@ from .models import CategoriaCard
 class CategoriaCardAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'slug', 'ordem')
     prepopulated_fields = {'slug': ('titulo',)}    
+    
+    
+    
+    
+from .models import ConfiguracaoPix
+
+@admin.register(ConfiguracaoPix)
+class ConfiguracaoPixAdmin(admin.ModelAdmin):
+    list_display = ('chave_pix', 'nome_titular', 'rotulo_taxa_pix', 'taxa_estatal_percentual')
+    
+    fieldsets = (
+        ('Chave e Recebedor', {
+            'fields': ('chave_pix', 'nome_titular')
+        }),
+        ('Nomenclatura e Taxas', {
+            'fields': ('rotulo_taxa_pix', 'taxa_estatal_percentual', 'instrucao_pagamento')
+        }),
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False

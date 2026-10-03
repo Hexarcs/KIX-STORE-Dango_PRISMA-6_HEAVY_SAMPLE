@@ -13,3 +13,7 @@ deactivate
 
 # 5. Reinicia o serviço no systemd para carregar o novo settings.py
 sudo systemctl restart supermercado.service
+
+
+####alias###
+recompilar_sup

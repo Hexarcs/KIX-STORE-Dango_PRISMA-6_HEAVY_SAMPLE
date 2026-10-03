@@ -16,6 +16,50 @@ from .forms import ProfileForm
 load_dotenv()
 
 
+# def home(request):
+#     """Página inicial com a vitrine de produtos dinâmica, cotação BTC/BRL, Hero e Macro Categorias Customizáveis"""
+#     agora = timezone.now()
+#     vinte_quatro_horas_atras = agora - timedelta(hours=24)
+
+#     registro_cotacao = CotacaoBitcoin.objects.last()
+
+#     if not registro_cotacao or registro_cotacao.ultima_atualizacao < vinte_quatro_horas_atras:
+#         try:
+#             url = "https://rest.coinapi.io/v1/exchangerate/BTC/BRL"
+#             headers = {'X-CoinAPI-Key': os.getenv('COINAPI_KEY', '')}
+
+#             response = requests.get(url, headers=headers, timeout=10)
+
+#             if response.status_code == 200:
+#                 data = response.json()
+#                 novo_preco = data['rate']
+
+#                 if not registro_cotacao:
+#                     registro_cotacao = CotacaoBitcoin.objects.create(
+#                         preco_brl=novo_preco,
+#                         ultima_atualizacao=agora
+#                     )
+#                 else:
+#                     registro_cotacao.preco_brl = novo_preco
+#                     registro_cotacao.ultima_atualizacao = agora
+#                     registro_cotacao.save()
+
+#         except Exception as e:
+#             print(f"Erro ao buscar cotação na CoinAPI: {e}")
+
+#     produtos_vitrine = Produto.objects.filter(is_promo=True)[:4]
+#     hero_config = HomeConfig.objects.filter(ativo=True).first()
+#     macro_categorias = MacroCategoria.objects.filter(ativo=True).order_by('ordem')
+
+#     context = {
+#         "products": produtos_vitrine,
+#         "btc_preco": registro_cotacao.preco_brl if registro_cotacao else None,
+#         "ultima_checagem": registro_cotacao.ultima_atualizacao if registro_cotacao else None,
+#         "hero_config": hero_config,
+#         "macro_categorias": macro_categorias,
+#     }
+#     return render(request, "index.html", context)
+
 def home(request):
     """Página inicial com a vitrine de produtos dinâmica, cotação BTC/BRL, Hero e Macro Categorias Customizáveis"""
     agora = timezone.now()
@@ -25,14 +69,15 @@ def home(request):
 
     if not registro_cotacao or registro_cotacao.ultima_atualizacao < vinte_quatro_horas_atras:
         try:
-            url = "https://rest.coinapi.io/v1/exchangerate/BTC/BRL"
-            headers = {'X-CoinAPI-Key': os.getenv('COINAPI_KEY', '')}
-
-            response = requests.get(url, headers=headers, timeout=10)
+            url = "https://api.binance.com/api/v3/ticker/price?symbol=BTCBRL"
+            
+            # A Binance não exige headers de autenticação para esta rota pública
+            response = requests.get(url, timeout=10)
 
             if response.status_code == 200:
                 data = response.json()
-                novo_preco = data['rate']
+                # A Binance retorna o preço dentro da chave 'price' em formato de string
+                novo_preco = float(data['price'])
 
                 if not registro_cotacao:
                     registro_cotacao = CotacaoBitcoin.objects.create(
@@ -45,7 +90,7 @@ def home(request):
                     registro_cotacao.save()
 
         except Exception as e:
-            print(f"Erro ao buscar cotação na CoinAPI: {e}")
+            print(f"Erro ao buscar cotação na Binance: {e}")
 
     produtos_vitrine = Produto.objects.filter(is_promo=True)[:4]
     hero_config = HomeConfig.objects.filter(ativo=True).first()

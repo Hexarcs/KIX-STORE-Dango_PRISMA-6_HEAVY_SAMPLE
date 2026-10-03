@@ -233,3 +233,61 @@ class CategoriaCard(models.Model):
 
 
 
+
+# =========================================================================
+# CONFIGURAÇÃO DO PIX
+# =========================================================================
+
+class ConfiguracaoPix(models.Model):
+    """Configurações centralizadas do PIX para destaque no Admin."""
+    
+    chave_pix = models.CharField(
+        max_length=255,
+        default="SUA_CHAVE_PIX_AQUI",
+        verbose_name="Chave PIX (E-mail, CPF, CNPJ ou Aleatória)",
+        help_text="Chave PIX que será exibida para o cliente realizar o pagamento."
+    )
+    nome_titular = models.CharField(
+        max_length=100,
+        default="Supermercado Itatingax",
+        verbose_name="Nome do Titular/Recebedor",
+        help_text="Nome da conta que aparecerá no comprovante do cliente."
+    )
+    
+    # NEW: Novo campo para personalizar o texto da taxa
+    rotulo_taxa_pix = models.CharField(
+        max_length=100,
+        default="Taxa de Processamento Fiat (PIX)",
+        verbose_name="Rótulo / Nome da Taxa",
+        help_text="Texto que aparece antes do valor da taxa. Ex: Taxa de Processamento Fiat, Taxa de Submissão Estatal, Taxa de Conveniência"
+    )
+    
+    taxa_estatal_percentual = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=10.00,
+        verbose_name="Taxa da Operação Fiat (%)",
+        help_text="Porcentagem de taxa cobrada no checkout PIX (ex: 10.00 para +10%)."
+    )
+    instrucao_pagamento = models.TextField(
+        default="Envie o valor exato em Reais.",
+        verbose_name="Mensagem / Aviso do Modal",
+        help_text="Texto explicativo mostrado na parte inferior do modal PIX."
+    )
+
+    class Meta:
+        verbose_name = "Configuração do PIX"
+        verbose_name_plural = "Configuração do PIX"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return f"Configuração PIX ({self.chave_pix})"
+

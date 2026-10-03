@@ -159,27 +159,34 @@
                 </div>
             </div>
 
-            <div id="step-pix-estatal" style="display: none;">
-                <h3>🏛️ Checkout PIX Estatal</h3>
-                
-                <div class="pix-qr-container" style="text-align: center; margin: 15px 0;">
-                </div>
+<div id="step-pix-estatal" style="display: none;">
+    <h3>🏛️ Checkout PIX Estatal</h3>
+    
+    <!-- QR Code da Chave PIX gerado dinamicamente -->
+    <div class="pix-qr-container" style="text-align: center; margin: 15px 0;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ pix_config.chave_pix }}" 
+             alt="QR Code Chave PIX" 
+             style="background: #fff; padding: 10px; border-radius: 10px; width: 180px; height: 180px; display: inline-block;">
+    </div>
 
-                <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left; font-size: 15px;">
-                    <p>Subtotal do Carrinho: <span id="pix-subtotal-sats">0</span> sats</p>
-                    <p style="color: #ff5555;">⚠️ Taxa de Submissão Estatal: +10%</p>
-                    <p>Cotação utilizada: <strong style="color: #f2a900;">R$ <span id="pix-btc-cotacao">0</span></strong></p>
-                    <hr style="border-color: #333;">
-                    <p style="font-size: 18px;">Total a pagar: <strong style="color: #32b3a2;">R$ <span id="pix-total-reais">0,00</span></strong></p>
-                </div>
-                
-                <div style="background: #111; padding: 12px; border: 1px dashed #32b3a2; border-radius: 4px; margin-bottom: 15px;">
-                    <p style="margin: 0; font-size: 13px; color: #aaa;">Chave PIX E-mail:</p>
-                    <code style="font-size: 16px; color: #fff; display: block; margin-top: 5px; word-break: break-all;">pereelt@gmail.com</code>
-                </div>
-                
-                <p style="font-size: 12px; color: #888; font-style: italic;">Envie o valor exato em Reais. O processamento estatal pode levar até 3 dias úteis para homologação fiscal.</p>
-            </div>
+    <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left; font-size: 15px;">
+        <p>Subtotal do Carrinho: <span id="pix-subtotal-sats">0</span> sats</p>
+        <p style="color: #ff5555;">⚠️ {{ pix_config.rotulo_taxa_pix|default:"Taxa de Processamento Fiat" }}: +{{ pix_config.taxa_estatal_percentual }}%</p>
+        <p>Cotação utilizada: <strong style="color: #f2a900;">R$ <span id="pix-btc-cotacao">0</span></strong></p>
+        <hr style="border-color: #333;">
+        <p style="font-size: 18px;">Total a pagar: <strong style="color: #32b3a2;">R$ <span id="pix-total-reais">0,00</span></strong></p>
+    </div>
+    
+    <div style="background: #111; padding: 12px; border: 1px dashed #32b3a2; border-radius: 4px; margin-bottom: 15px;">
+        <p style="margin: 0; font-size: 13px; color: #aaa;">Titular: <strong>{{ pix_config.nome_titular }}</strong></p>
+        <p style="margin: 5px 0 0 0; font-size: 13px; color: #aaa;">Chave PIX:</p>
+        <code style="font-size: 16px; color: #fff; display: block; margin-top: 5px; word-break: break-all;">
+            {{ pix_config.chave_pix }}
+        </code>
+    </div>
+    
+    <p style="font-size: 12px; color: #888; font-style: italic;">{{ pix_config.instrucao_pagamento }}</p>
+</div>
 
         </div>
     </div>
