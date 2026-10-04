@@ -27,8 +27,8 @@ function loadUserData() {
     .then(data => {
         const phoneEl = document.getElementById('user-phone');
         const addressEl = document.getElementById('user-address');
-        if(phoneEl) phoneEl.innerText = data.telefone || 'Não informado';
-        if(addressEl) addressEl.innerText = data.endereco || 'Não informado';
+        if (phoneEl) phoneEl.innerText = data.telefone || 'Não informado';
+        if (addressEl) addressEl.innerText = data.endereco || 'Não informado';
     })
     .catch(err => console.error("Erro ao carregar perfil:", err));
 }
@@ -55,7 +55,7 @@ if (themeToggleBtn) {
 
 
 // ==========================================
-// 4. ATUALIZAÇÃO DA UI DO CARRINHO (WIDGETS)
+// 4. ATUALIZAÇÃO DA UI DO CARRINHO (WIDGETS & LISTAS)
 // ==========================================
 function updateGlobalCartUI(totalItems, totalSats) {
     const counterEl = document.getElementById('cart-counter');
@@ -73,6 +73,81 @@ function updateGlobalCartUI(totalItems, totalSats) {
         if (btnPay) btnPay.style.display = 'none';
         if (btnClear) btnClear.style.display = 'none';
     }
+}
+
+// Renderiza a lista detalhada dos itens dentro dos modais de pagamento (KIX e PIX)
+function atualizarListasModal(itensCarrinho) {
+    const kixContainer = document.getElementById('kix-items-list');
+    const pixContainer = document.getElementById('pix-items-list');
+
+    if (!kixContainer && !pixContainer) return;
+
+    // Normaliza para Array caso venha como Objeto do backend
+    const lista = Array.isArray(itensCarrinho) 
+        ? itensCarrinho 
+        : (itensCarrinho ? Object.values(itensCarrinho) : []);
+
+    if (lista.length === 0) {
+        const vazioHtml = '<p style="margin:0; color:#888;">Nenhum item selecionado.</p>';
+        if (kixContainer) kixContainer.innerHTML = vazioHtml;
+        if (pixContainer) pixContainer.innerHTML = vazioHtml;
+        return;
+    }
+
+    let htmlItensKix = '';
+    let htmlItensPix = '';
+
+    lista.forEach(item => {
+        const subtotal = item.subtotal_sats ?? ((item.price_sats || 0) * (item.quantity || 1));
+        const subtotalFormatado = Number(subtotal).toLocaleString('pt-BR');
+
+        // Formato para KIX (Lightning)
+        htmlItensKix += `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span>${item.name} <small style="color:#888;">(x${item.quantity})</small></span>
+                <strong style="color: #f2a900;">${subtotalFormatado} sats</strong>
+            </div>
+        `;
+
+        // Formato para PIX Estatal
+        htmlItensPix += `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span>${item.name} <small style="color:#888;">(x${item.quantity})</small></span>
+                <strong style="color: #32b3a2;">${subtotalFormatado} sats</strong>
+            </div>
+        `;
+    });
+
+    if (kixContainer) kixContainer.innerHTML = htmlItensKix;
+    if (pixContainer) pixContainer.innerHTML = htmlItensPix;
+}
+
+// Sincroniza o estado completo do carrinho junto ao backend
+function fetchCartStatus() {
+    return fetch('/cart/status/')
+    .then(response => response.json())
+    .then(data => {
+        updateGlobalCartUI(data.total_items || 0, data.total_sats || 0);
+
+        if (data.items) {
+            // Atualiza contadores individuais na vitrine
+            const itemsEntries = Array.isArray(data.items) 
+                ? data.items.map(i => [i.product_id || i.id, i])
+                : Object.entries(data.items);
+
+            itemsEntries.forEach(([prodId, item]) => {
+                const qtySpan = document.getElementById(`qty_${prodId}`);
+                if (qtySpan) {
+                    qtySpan.innerText = item.quantity || 0;
+                }
+            });
+
+            atualizarListasModal(data.items);
+        } else {
+            atualizarListasModal([]);
+        }
+    })
+    .catch(error => console.error('Erro ao carregar status do carrinho:', error));
 }
 
 
@@ -103,8 +178,9 @@ document.querySelectorAll('.btn-add').forEach(button => {
                 updateGlobalCartUI(data.total_items, data.total_sats);
                 const qtySpan = document.getElementById(`qty_${productId}`);
                 if (qtySpan) {
-                    qtySpan.innerText = parseInt(qtySpan.innerText) + 1;
+                    qtySpan.innerText = parseInt(qtySpan.innerText || '0') + 1;
                 }
+                fetchCartStatus(); // Atualiza as listas do modal
             }
             this.disabled = false;
         })
@@ -121,7 +197,7 @@ document.querySelectorAll('.btn-remove').forEach(button => {
         if (!productId) return;
 
         const qtySpan = document.getElementById(`qty_${productId}`);
-        if (!qtySpan || parseInt(qtySpan.innerText) <= 0) return;
+        if (!qtySpan || parseInt(qtySpan.innerText || '0') <= 0) return;
 
         const formData = new FormData();
         formData.append('product_id', productId);
@@ -140,8 +216,9 @@ document.querySelectorAll('.btn-remove').forEach(button => {
         .then(data => {
             if (data.total_items !== undefined) {
                 updateGlobalCartUI(data.total_items, data.total_sats);
-                const currentQty = parseInt(qtySpan.innerText);
+                const currentQty = parseInt(qtySpan.innerText || '0');
                 qtySpan.innerText = currentQty > 0 ? currentQty - 1 : 0;
+                fetchCartStatus(); // Atualiza as listas do modal
             }
             this.disabled = false;
         })
@@ -167,11 +244,12 @@ if (btnClearCart) {
             if (!response.ok) throw new Error('Erro na requisição');
             return response.json();
         })
-        .then(data => {
+        .then(() => {
             updateGlobalCartUI(0, 0);
             document.querySelectorAll('.product-qty').forEach(qtySpan => {
                 qtySpan.innerText = '0';
             });
+            atualizarListasModal([]);
             this.disabled = false;
         })
         .catch(error => {
@@ -203,29 +281,21 @@ let paymentHash = null;
 let checkInterval = null;  
 let checkCount = 0;        
 
-// FUNÇÃO PARA GERAR A INVOICE (KIX NATÍVIO)
-// FUNÇÃO PARA GERAR A INVOICE (KIX NATÍVIO)
+// FUNÇÃO PARA GERAR A INVOICE (KIX NATÍVO - LIGHTNING)
 function fetchLightningInvoice() {
     if (invoiceTextDiv) invoiceTextDiv.innerText = "Gerando invoice na Lightning Network...";
     if (qrContainer) qrContainer.innerHTML = "<span style='color:var(--texto-secundario); font-size:14px;'>Aguardando dados...</span>";
     if (btnRetryInvoice) btnRetryInvoice.style.display = 'none';
     if (btnConfirmMock) btnConfirmMock.style.display = 'none';
 
-    // =========================================================================
-    // CORREÇÃO: Busca o valor em tempo real direto do widget oficial do carrinho
-    // =========================================================================
     const cartTotalEl = document.getElementById('cart-total-sats');
     const displaySatsEl = document.getElementById('modal-total-sats-display');
     const modalTotalEl = document.getElementById('modal-total-sats');
 
     if (cartTotalEl) {
-        // Sincroniza o display visual superior (do checkout KIX)
         if (displaySatsEl) displaySatsEl.innerText = cartTotalEl.innerText;
-        
-        // Mantém o input do modal atualizado caso o usuário mude para o Pix Estatal
         if (modalTotalEl) modalTotalEl.innerText = cartTotalEl.innerText;
     }
-    // =========================================================================
 
     if (checkInterval) clearInterval(checkInterval);
     paymentHash = null;
@@ -244,7 +314,7 @@ function fetchLightningInvoice() {
             paymentHash = data.payment_hash; 
 
             // Geração do QR Code
-            if (qrContainer) {
+            if (qrContainer && typeof qrcode !== 'undefined') {
                 const qr = qrcode(0, 'L');
                 qr.addData(data.payment_request);
                 qr.make();
@@ -323,18 +393,19 @@ function checkStatusOnBackend() {
 
 if (btnPay) {
     btnPay.addEventListener('click', () => {
-        if(stepPayment) stepPayment.style.display = 'none';
-        if(stepPixEstatal) stepPixEstatal.style.display = 'none';
-        if(stepConfirm) stepConfirm.style.display = 'block';
-        
+        if (stepPayment) stepPayment.style.display = 'none';
+        if (stepPixEstatal) stepPixEstatal.style.display = 'none';
+        if (stepConfirm) stepConfirm.style.display = 'block';
+
         const cartTotalEl = document.getElementById('cart-total-sats');
         const modalTotalEl = document.getElementById('modal-total-sats');
-        
+
         if (cartTotalEl && modalTotalEl) {
             modalTotalEl.innerText = cartTotalEl.innerText;
         }
-        
+
         loadUserData();
+        fetchCartStatus(); // Garante lista atualizada antes de abrir
         if (modal) modal.style.display = 'flex';
     });
 }
@@ -342,26 +413,23 @@ if (btnPay) {
 const btnProceedToPayment = document.getElementById('btn-proceed-to-payment');
 if (btnProceedToPayment) {
     btnProceedToPayment.addEventListener('click', () => {
-        if(stepConfirm) stepConfirm.style.display = 'none';
-        if(stepPayment) stepPayment.style.display = 'block';
+        if (stepConfirm) stepConfirm.style.display = 'none';
+        if (stepPayment) stepPayment.style.display = 'block';
         fetchLightningInvoice();
     });
 }
 
 if (btnPixEstatal) {
     btnPixEstatal.addEventListener('click', () => {
-        // CORREÇÃO: Lê direto do widget oficial do carrinho para evitar travas de nulo
         const cartTotalEl = document.getElementById('cart-total-sats');
         if (!cartTotalEl) {
             alert("Erro: Carrinho não encontrado na página.");
             return;
         }
 
-        // Limpa string formatada tirando pontos (ex: "1.898" vira "1898")
         const rawSatsText = cartTotalEl.innerText.replace(/\./g, '');
         const totalSats = parseInt(rawSatsText) || 0;
-        
-        // Lê o input hidden que criamos no Context Processor global do Django
+
         const btcPriceInput = document.getElementById('btc-price-hidden');
         const btcPrice = btcPriceInput ? parseFloat(btcPriceInput.value) : 0;
 
@@ -370,13 +438,12 @@ if (btnPixEstatal) {
             return;
         }
 
-        // Aplica o fator de submissão (10% de imposto)
+        // Aplica taxa/imposto de 10%
         const satsComTaxa = totalSats * 1.10;
         
         // Converte Sats para Real
         const totalReais = (satsComTaxa / 100000000) * btcPrice;
 
-        // Elementos de exibição do Pix Estatal no modal
         const subtotalSatsEl = document.getElementById('pix-subtotal-sats');
         const btcCotacaoEl = document.getElementById('pix-btc-cotacao');
         const totalReaisEl = document.getElementById('pix-total-reais');
@@ -385,15 +452,13 @@ if (btnPixEstatal) {
         if (btcCotacaoEl) btcCotacaoEl.innerText = btcPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         if (totalReaisEl) totalReaisEl.innerText = totalReais.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // ==========================================
-        // GERAÇÃO DO QR CODE DO PIX ESTATAL
-        // ==========================================
+        // Gerar QR Code do PIX
         const pixQrContainer = document.querySelector('.pix-qr-container');
-        if (pixQrContainer) {
+        if (pixQrContainer && typeof qrcode !== 'undefined') {
             const qrPix = qrcode(0, 'L');
-            qrPix.addData('pereelt@gmail.com'); // Chave estática
+            qrPix.addData('pereelt@gmail.com');
             qrPix.make();
-            
+
             pixQrContainer.innerHTML = qrPix.createImgTag(4);
 
             const qrImg = pixQrContainer.querySelector('img');
@@ -406,9 +471,8 @@ if (btnPixEstatal) {
             }
         }
 
-        // Alterna as telas internas do modal
-        if(stepConfirm) stepConfirm.style.display = 'none';
-        if(stepPixEstatal) stepPixEstatal.style.display = 'block';
+        if (stepConfirm) stepConfirm.style.display = 'none';
+        if (stepPixEstatal) stepPixEstatal.style.display = 'block';
     });
 }
 
@@ -439,67 +503,5 @@ if (btnConfirmMock) {
 // 7. INICIALIZAÇÃO DA PÁGINA (DOM CARREGADO)
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    fetch('/cart/status/')
-    .then(response => response.json())
-    .then(data => {
-        updateGlobalCartUI(data.total_items, data.total_sats);
-
-        if (data.items) {
-            Object.keys(data.items).forEach(prodId => {
-                const qtySpan = document.getElementById(`qty_${prodId}`);
-                if (qtySpan) {
-                    qtySpan.innerText = data.items[prodId].quantity || 0;
-                }
-            });
-        }
-    })
-    .catch(error => console.error('Erro ao carregar status inicial:', error));
+    fetchCartStatus();
 });
-
-
-// ==========================================
-// 8. IItens do carrinho
-// ==========================================
-
-// Função para renderizar os itens dentro da div do modal
-function renderizarItensModal(itens) {
-    const kixContainer = document.getElementById('kix-items-list');
-    const pixContainer = document.getElementById('pix-items-list');
-
-    if (!itens || itens.length === 0) {
-        const textoVazio = '<span style="color:#888; font-size:12px;">Nenhum item no carrinho</span>';
-        if (kixContainer) kixContainer.innerHTML = textoVazio;
-        if (pixContainer) pixContainer.innerHTML = textoVazio;
-        return;
-    }
-
-    let htmlKix = '';
-    let htmlPix = '';
-
-    // Se "itens" for um objeto (estilo dict do JS), convertemos para Array:
-    const listaItens = Array.isArray(itens) ? itens : Object.values(itens);
-
-    listaItens.forEach(item => {
-        const nome = item.name || item.nome;
-        const qtd = item.quantity || item.qtd || 1;
-        const precoSats = item.price_sats || item.preco_sats || 0;
-        const subtotal = precoSats * qtd;
-
-        htmlKix += `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>${nome} <small style="color:#888;">(x${qtd})</small></span>
-                <strong style="color: #f2a900;">${subtotal.toLocaleString()} sats</strong>
-            </div>
-        `;
-
-        htmlPix += `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>${nome} <small style="color:#888;">(x${qtd})</small></span>
-                <strong style="color: #32b3a2;">${subtotal.toLocaleString()} sats</strong>
-            </div>
-        `;
-    });
-
-    if (kixContainer) kixContainer.innerHTML = htmlKix;
-    if (pixContainer) pixContainer.innerHTML = htmlPix;
-}
