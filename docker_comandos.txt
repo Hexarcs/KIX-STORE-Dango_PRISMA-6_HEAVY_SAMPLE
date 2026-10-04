@@ -28,25 +28,23 @@ docker push: Envia a imagem local para o repositório remoto (Docker Hub).
 
 docker compose up -d --build: Reconstrói e roda localmente usando o Compose (sem enviar pro Docker Hub).
 
+# Para atualizar a imagem zeloko/supermercado-kix:latest no Docker Hub com as alterações mais recentes, os comandos exatos no terminal são:
 
+# 1. Gerar a nova versão da imagem (Build)
+# Rode no terminal dentro da pasta onde está o Dockerfile:
 
-
-Para atualizar a imagem zeloko/supermercado-kix:latest no Docker Hub com as alterações mais recentes, os comandos exatos no terminal são:
-
-1. Gerar a nova versão da imagem (Build)
-Rode no terminal dentro da pasta onde está o Dockerfile:
-
-Bash
+# Bash
 docker build -t zeloko/supermercado-kix:latest .
-(Se o seu docker-compose.yml tiver o parâmetro build: . configurado no serviço web, você também pode simplesmente usar docker compose build)
+# (Se o seu docker-compose.yml tiver o parâmetro build: . configurado no serviço web, você também pode simplesmente usar docker compose build)
 
-2. Autenticar no Docker Hub
-Caso ainda não tenha feito o login nesta sessão do terminal:
+# 2. Autenticar no Docker Hub
+# Caso ainda não tenha feito o login nesta sessão do terminal:
 
-Bash
+# Bash
 docker login
-3. Enviar para o Docker Hub (Push)
 
-Bash
+# 3. Enviar para o Docker Hub (Push)
+
+# Bash
 docker push zeloko/supermercado-kix:latest
-Isso vai sobrescrever a versão antiga no Docker Hub mantendo a tag :latest. Quando você precisar puxar a nova versão em qualquer outro servidor, basta executar docker pull zeloko/supermercado-kix:latest.
+# Isso vai sobrescrever a versão antiga no Docker Hub mantendo a tag :latest. Quando você precisar puxar a nova versão em qualquer outro servidor, basta executar docker pull zeloko/supermercado-kix:latest.

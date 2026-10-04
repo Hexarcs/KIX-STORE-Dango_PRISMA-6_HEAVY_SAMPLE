@@ -106,86 +106,112 @@
         {% endblock %}
     </main>
 
-    <div id="pay-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
+   <div id="pay-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        
+        <!-- ETAPA 1: CONFIRMAR DADOS -->
+        <div id="step-confirm-address">
+            <h3>📍 Confirmar Entrega</h3>
+            <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left;">
+                <p><strong>WhatsApp:</strong> <span id="user-phone">Carregando...</span></p>
+                <p><strong>Endereço:</strong> <span id="user-address">Carregando...</span></p>
+            </div>
             
-            <div id="step-confirm-address">
-                <h3>📍 Confirmar Entrega</h3>
-                <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left;">
-                    <p><strong>WhatsApp:</strong> <span id="user-phone">Carregando...</span></p>
-                    <p><strong>Endereço:</strong> <span id="user-address">Carregando...</span></p>
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <a href="/perfil/editar/" class="btn-secondary" style="flex: 1; text-align: center; background: #444; color: #fff; padding: 10px; border-radius: 4px; text-decoration: none; font-size: 14px;">
-                        ✏️ Corrigir Dados
-                    </a>
-                </div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <a href="/perfil/editar/" class="btn-secondary" style="flex: 1; text-align: center; background: #444; color: #fff; padding: 10px; border-radius: 4px; text-decoration: none; font-size: 14px;">
+                    ✏️ Corrigir Dados
+                </a>
+            </div>
 
-                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                    <button id="btn-proceed-to-payment" class="btn-pay" style="background: #f2a900; color: #000; width: 100%;">
-                        ⚡ Pagar Nativo com KIX (10% de Desconto)
-                    </button>
-                    
-                    <button id="btn-pix-estatal" class="btn-pay" style="background: #32b3a2; color: #fff; width: 100%;">
-                        📱 Pagar pelo PIX-Estatal (+10% Taxa)
-                    </button>
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <button id="btn-proceed-to-payment" class="btn-pay" style="background: #f2a900; color: #000; width: 100%;">
+                    ⚡ Pagar Nativo com KIX (10% de Desconto)
+                </button>
+                
+                <button id="btn-pix-estatal" class="btn-pay" style="background: #32b3a2; color: #fff; width: 100%;">
+                    📱 Pagar pelo PIX-Estatal (+10% Taxa)
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 2: CHECKOUT KIX (SATS) -->
+        <div id="step-payment" style="display: none; text-align: center;">
+            <h3 style="margin-bottom: 10px; color: #f2a900;">⚡ Checkout KIX</h3>
+            
+            <!-- Lista de Itens do Carrinho (Sats) -->
+            <div style="background: #181818; padding: 10px 12px; border-radius: 6px; border: 1px solid #333; margin: 10px 0; text-align: left; max-height: 110px; overflow-y: auto;">
+                <p style="margin: 0 0 6px 0; font-size: 11px; color: #888; font-weight: bold; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px;">📦 ITENS SELECIONADOS:</p>
+                <div id="kix-items-list" style="font-size: 13px; color: #ccc; display: flex; flex-direction: column; gap: 4px;">
+                    <!-- Preenchido via JavaScript -->
                 </div>
             </div>
 
-            <div id="step-payment" style="display: none; text-align: center;">
-                <h3 style="margin-bottom: 15px; color: #f2a900;">⚡ Checkout KIX</h3>
-                <p style="font-size: 14px; margin-bottom: 5px; color: var(--texto-secundario);">Total a pagar:</p>
-                <p style="font-size: 22px; font-weight: bold; margin-top: 0; color: #fff;"><span id="modal-total-sats-display">0</span> sats</p>
-                
-                <div class="qr-container" style="background: #fff; padding: 12px; border-radius: 12px; display: inline-block; margin: 15px auto; min-width: 150px; min-height: 150px;">
-                </div>
+            <p style="font-size: 14px; margin-bottom: 5px; color: var(--texto-secundario);">Total a pagar:</p>
+            <p style="font-size: 22px; font-weight: bold; margin-top: 0; color: #fff;"><span id="modal-total-sats-display">0</span> sats</p>
+            
+            <div class="qr-container" style="background: #fff; padding: 12px; border-radius: 12px; display: inline-block; margin: 10px auto; min-width: 150px; min-height: 150px;">
+            </div>
 
-                <div style="background: #111; padding: 10px; border-radius: 6px; border: 1px solid #333; margin: 15px 0;">
-                    <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px; text-align: left;">Código Copia e Cola:</span>
-                    <div class="invoice-text" style="font-family: monospace; font-size: 11px; color: #aaa; word-break: break-all; max-height: 60px; overflow-y: auto; text-align: left; padding-right: 5px;">
-                        Aguardando dados...
-                    </div>
+            <div style="background: #111; padding: 10px; border-radius: 6px; border: 1px solid #333; margin: 10px 0;">
+                <span style="font-size: 11px; color: #888; display: block; margin-bottom: 5px; text-align: left;">Código Copia e Cola:</span>
+                <div class="invoice-text" style="font-family: monospace; font-size: 11px; color: #aaa; word-break: break-all; max-height: 60px; overflow-y: auto; text-align: left; padding-right: 5px;">
+                    Aguardando dados...
                 </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button id="btn-confirm-mock" class="btn-pay" style="display: none; width: 100%; background: #27ae60; color: #fff;">
-                        Confirmar 
-                    </button>
-                    <button id="btn-retry-invoice" class="btn-pay" style="display: none; width: 100%; background: #e74c3c; color: #fff;">
-                        🔄 Tentar Novamente
-                    </button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button id="btn-confirm-mock" class="btn-pay" style="display: none; width: 100%; background: #27ae60; color: #fff;">
+                    Confirmar 
+                </button>
+                <button id="btn-retry-invoice" class="btn-pay" style="display: none; width: 100%; background: #e74c3c; color: #fff;">
+                    🔄 Tentar Novamente
+                </button>
+            </div>
+        </div>
+
+        <!-- ETAPA 3: CHECKOUT PIX ESTATAL -->
+        <div id="step-pix-estatal" style="display: none;">
+            <h3>🏛️ Checkout PIX Estatal</h3>
+            
+            <!-- QR Code da Chave PIX -->
+            <div class="pix-qr-container" style="text-align: center; margin: 10px 0;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ pix_config.chave_pix }}" 
+                     alt="QR Code Chave PIX" 
+                     style="background: #fff; padding: 8px; border-radius: 10px; width: 160px; height: 160px; display: inline-block;">
+            </div>
+
+            <!-- Lista de Itens do Carrinho (PIX) -->
+            <div style="background: #181818; padding: 10px 12px; border-radius: 6px; border: 1px solid #333; margin: 10px 0; text-align: left; max-height: 110px; overflow-y: auto;">
+                <p style="margin: 0 0 6px 0; font-size: 11px; color: #888; font-weight: bold; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px;">📦 ITENS SELECIONADOS:</p>
+                <div id="pix-items-list" style="font-size: 13px; color: #ccc; display: flex; flex-direction: column; gap: 4px;">
+                    <!-- Preenchido via JavaScript -->
                 </div>
             </div>
 
-<div id="step-pix-estatal" style="display: none;">
-    <h3>🏛️ Checkout PIX Estatal</h3>
-    
-    <!-- QR Code da Chave PIX gerado dinamicamente -->
-    <div class="pix-qr-container" style="text-align: center; margin: 15px 0;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={{ pix_config.chave_pix }}" 
-             alt="QR Code Chave PIX" 
-             style="background: #fff; padding: 10px; border-radius: 10px; width: 180px; height: 180px; display: inline-block;">
-    </div>
+            <div style="background: #222; padding: 12px; border-radius: 6px; margin: 10px 0; text-align: left; font-size: 14px;">
+                <p style="margin: 4px 0;">Subtotal do Carrinho: <span id="pix-subtotal-sats">0</span> sats</p>
+                <p style="color: #ff5555; margin: 4px 0;">⚠️ {{ pix_config.rotulo_taxa_pix|default:"Taxa de Processamento Fiat" }}: +{{ pix_config.taxa_estatal_percentual }}%</p>
+                <p style="margin: 4px 0;">Cotação utilizada: <strong style="color: #f2a900;">R$ <span id="pix-btc-cotacao">0</span></strong></p>
+                <hr style="border-color: #333; margin: 8px 0;">
+                <p style="font-size: 17px; margin: 4px 0;">Total a pagar: <strong style="color: #32b3a2;">R$ <span id="pix-total-reais">0,00</span></strong></p>
+            </div>
+            
+            <div style="background: #111; padding: 10px; border: 1px dashed #32b3a2; border-radius: 4px; margin-bottom: 10px;">
+                <p style="margin: 0; font-size: 12px; color: #aaa;">Titular: <strong>{{ pix_config.nome_titular }}</strong></p>
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #aaa;">Chave PIX:</p>
+                <code style="font-size: 15px; color: #fff; display: block; margin-top: 3px; word-break: break-all;">
+                    {{ pix_config.chave_pix }}
+                </code>
+            </div>
+            
+            <p style="font-size: 11px; color: #888; font-style: italic;">{{ pix_config.instrucao_pagamento }}</p>
+        </div>
 
-    <div style="background: #222; padding: 15px; border-radius: 6px; margin: 10px 0; text-align: left; font-size: 15px;">
-        <p>Subtotal do Carrinho: <span id="pix-subtotal-sats">0</span> sats</p>
-        <p style="color: #ff5555;">⚠️ {{ pix_config.rotulo_taxa_pix|default:"Taxa de Processamento Fiat" }}: +{{ pix_config.taxa_estatal_percentual }}%</p>
-        <p>Cotação utilizada: <strong style="color: #f2a900;">R$ <span id="pix-btc-cotacao">0</span></strong></p>
-        <hr style="border-color: #333;">
-        <p style="font-size: 18px;">Total a pagar: <strong style="color: #32b3a2;">R$ <span id="pix-total-reais">0,00</span></strong></p>
     </div>
-    
-    <div style="background: #111; padding: 12px; border: 1px dashed #32b3a2; border-radius: 4px; margin-bottom: 15px;">
-        <p style="margin: 0; font-size: 13px; color: #aaa;">Titular: <strong>{{ pix_config.nome_titular }}</strong></p>
-        <p style="margin: 5px 0 0 0; font-size: 13px; color: #aaa;">Chave PIX:</p>
-        <code style="font-size: 16px; color: #fff; display: block; margin-top: 5px; word-break: break-all;">
-            {{ pix_config.chave_pix }}
-        </code>
+</div>
+
     </div>
-    
-    <p style="font-size: 12px; color: #888; font-style: italic;">{{ pix_config.instrucao_pagamento }}</p>
 </div>
 
         </div>
@@ -195,3 +221,4 @@
     <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
+

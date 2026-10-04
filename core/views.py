@@ -270,3 +270,13 @@ def detalhe_categoria(request, slug):
         'produtos': produtos,
     }
     return render(request, 'categoria.html', context)
+
+
+
+
+
+def obter_carrinho_api(request):
+    cart = KixCart(request)
+    return JsonResponse(
+        cart.get_summary()
+    )  # Retorna lista de itens, total de itens e total sats

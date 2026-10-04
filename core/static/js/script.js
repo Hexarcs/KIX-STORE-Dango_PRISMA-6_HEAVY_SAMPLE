@@ -455,3 +455,51 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(error => console.error('Erro ao carregar status inicial:', error));
 });
+
+
+// ==========================================
+// 8. IItens do carrinho
+// ==========================================
+
+// Função para renderizar os itens dentro da div do modal
+function renderizarItensModal(itens) {
+    const kixContainer = document.getElementById('kix-items-list');
+    const pixContainer = document.getElementById('pix-items-list');
+
+    if (!itens || itens.length === 0) {
+        const textoVazio = '<span style="color:#888; font-size:12px;">Nenhum item no carrinho</span>';
+        if (kixContainer) kixContainer.innerHTML = textoVazio;
+        if (pixContainer) pixContainer.innerHTML = textoVazio;
+        return;
+    }
+
+    let htmlKix = '';
+    let htmlPix = '';
+
+    // Se "itens" for um objeto (estilo dict do JS), convertemos para Array:
+    const listaItens = Array.isArray(itens) ? itens : Object.values(itens);
+
+    listaItens.forEach(item => {
+        const nome = item.name || item.nome;
+        const qtd = item.quantity || item.qtd || 1;
+        const precoSats = item.price_sats || item.preco_sats || 0;
+        const subtotal = precoSats * qtd;
+
+        htmlKix += `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${nome} <small style="color:#888;">(x${qtd})</small></span>
+                <strong style="color: #f2a900;">${subtotal.toLocaleString()} sats</strong>
+            </div>
+        `;
+
+        htmlPix += `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>${nome} <small style="color:#888;">(x${qtd})</small></span>
+                <strong style="color: #32b3a2;">${subtotal.toLocaleString()} sats</strong>
+            </div>
+        `;
+    });
+
+    if (kixContainer) kixContainer.innerHTML = htmlKix;
+    if (pixContainer) pixContainer.innerHTML = htmlPix;
+}

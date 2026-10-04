@@ -26,6 +26,7 @@ urlpatterns = [
     # Rota da Categoria
     path('categoria/<str:nome>/', views.categoria_detalhe, name='categoria_detalhe'),
     path('categoria/<slug:slug>/', views.detalhe_categoria, name='categoria_detalhe'),
+    path('cart/summary/', views.obter_carrinho_api, name='cart_summary'),
 ]
 
 if settings.DEBUG:
