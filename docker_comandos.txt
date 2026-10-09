@@ -16,6 +16,12 @@ docker build -t zeloko/supermercado-kix:latest .
 docker push zeloko/supermercado-kix:latest
 
 
+
+cd ~/supermercado_kix
+docker build -t zeloko/supermercado-kix:latest .
+docker push zeloko/supermercado-kix:latest
+
+
 docker compose down
 
 docker rm -f kix_store_web

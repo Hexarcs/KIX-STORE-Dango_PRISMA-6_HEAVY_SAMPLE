@@ -42,11 +42,19 @@ class CotacaoBitcoin(models.Model):
 class Produto(models.Model):
     sku = models.CharField(
         max_length=50, 
+        unique=True, # Adicionado unique=True se for usar SKU na URL
         null=True, 
         blank=True, 
         help_text="Identificador único para o JS. Ex: prod_cafe_500"
     )
     nome = models.CharField(max_length=255)
+    
+    # NOVO CAMPO: Descrição detalhada do produto
+    descricao = models.TextField(
+        blank=True, 
+        null=True, 
+        verbose_name="Descrição do Produto"
+    )
     
     # Ligação com a Categoria
     categoria = models.ForeignKey(

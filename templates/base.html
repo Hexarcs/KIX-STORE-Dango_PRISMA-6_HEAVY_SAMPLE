@@ -11,6 +11,72 @@
         window.csrfToken = "{{ csrf_token }}";
     </script>
     <script src="{% static 'js/script.js' %}" defer></script>
+    <style>
+
+/* 1. Controla a grade para que 1 único card NÃO ocupe a tela inteira */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 280px)); /* auto-fill evita que 1 card expanda */
+    gap: 20px;
+    justify-content: start; /* Alinha os cards à esquerda quando houver poucos */
+}
+
+/* 2. Limita o tamanho máximo do card */
+.product-card {
+    width: 100%;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 3. Container de imagem quadrado e centralizado */
+.product-img {
+    width: 100%;
+    height: 200px; /* Altura fixa padrão para todos os cards */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1a1a1a; /* Fundo escuro para preencher sobras de imagens com proporções diferentes */
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 8px;
+}
+
+/* 4. Garante que a imagem inteira apareça (NUNCA corta/cropa) */
+.product-img img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Exibe a imagem completa dentro do container */
+}
+
+/* 1. Grade flexível que impede que poucos cards se estiquem */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 280px)); /* auto-fill fixa o tamanho máximo dos cards */
+    gap: 16px;
+    justify-content: start; /* Alinha os cards à esquerda */
+    margin-bottom: 30px;
+}
+
+/* 2. Garante o limite de largura e altura padronizada para cada card */
+.categories-grid .card-item {
+    width: 100%;
+    max-width: 280px;
+    min-height: 130px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 3. Efeito suave ao passar o mouse */
+.categories-grid .card-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+    </style>
 </head>
 <body>
     

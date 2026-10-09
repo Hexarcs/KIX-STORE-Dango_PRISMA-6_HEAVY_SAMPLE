@@ -27,6 +27,7 @@ urlpatterns = [
     path('categoria/<str:nome>/', views.categoria_detalhe, name='categoria_detalhe'),
     path('categoria/<slug:slug>/', views.detalhe_categoria, name='categoria_detalhe'),
     path('cart/summary/', views.obter_carrinho_api, name='cart_summary'),
+    path('produto/<str:sku>/', views.produto_detalhe, name='produto_detalhe'),
 ]
 
 if settings.DEBUG:

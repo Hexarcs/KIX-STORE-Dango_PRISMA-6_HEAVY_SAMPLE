@@ -280,3 +280,7 @@ def obter_carrinho_api(request):
     return JsonResponse(
         cart.get_summary()
     )  # Retorna lista de itens, total de itens e total sats
+    
+def produto_detalhe(request, sku):
+    product = get_object_or_404(Produto, sku=sku)
+    return render(request, 'produto_detalhe.html', {'product': product})

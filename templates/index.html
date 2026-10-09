@@ -58,42 +58,46 @@
     <div class="section-title">Ofertas Rápidas</div>
     <div class="section-subtitle">Itens selecionados com desconto líquido em Sats</div>
 
-    <div class="products-grid">
-        {% for product in products %}
-        <div class="product-card">
-            <div>
-                <div class="product-img">
-                    {% if product.imagem %}
-                        <img src="{{ product.imagem.url }}" alt="{{ product.nome }}">
-                    {% else %}
-                        <div class="product-icon-fallback">{{ product.icone|default:"📦" }}</div>
-                    {% endif %}
-                </div>
-                <div class="product-name">{{ product.nome }}</div>
-            </div>
+<div class="products-grid"> 
+    {% for product in products %} 
+    <div class="product-card"> 
+        <div> 
+            <!-- Link na Imagem/Ícone -->
+            <a href="{% url 'produto_detalhe' product.sku %}" style="text-decoration: none; color: inherit;">
+                <div class="product-img"> 
+                    {% if product.imagem %} 
+                        <img src="{{ product.imagem.url }}" alt="{{ product.nome }}"> 
+                    {% else %} 
+                        <div class="product-icon-fallback">{{ product.icone|default:"📦" }}</div> 
+                    {% endif %} 
+                </div> 
+                <!-- Link no Nome do Produto -->
+                <div class="product-name">{{ product.nome }}</div> 
+            </a>
+        </div> 
 
-            <div>
-                <div class="price-box">
-                    <div class="price-sats">⚡ {{ product.preco_sats }} Sats</div>
-                    <div class="price-brl">
-                        Ref: R$ {{ product.preco_brl }} (+10% R$ {{ product.preco_pix_estatal }} - via PIX-estatal)
-                    </div>
-                </div>
-                <div class="cart-controls">
-                    <button class="btn-qty btn-remove" data-product-id="{{ product.sku }}">—</button>
-                    <span class="product-qty" id="qty_{{ product.sku }}">0</span>
-                    <button class="btn-qty btn-add"
-                            data-product-id="{{ product.sku }}"
-                            data-name="{{ product.nome }}"
-                            data-price-sats="{{ product.preco_sats }}">+</button>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px; font-size: 14px;">
-            Nenhuma oferta rápida ativa no painel administrativo no momento.
-        </p>
-        {% endfor %}
-    </div>
+        <div> 
+            <div class="price-box"> 
+                <div class="price-sats">⚡ {{ product.preco_sats }} Sats</div> 
+                <div class="price-brl"> 
+                    Ref: R$ {{ product.preco_brl }} (+10% R$ {{ product.preco_pix_estatal }} - via PIX-estatal) 
+                </div> 
+            </div> 
+            <div class="cart-controls"> 
+                <button class="btn-qty btn-remove" data-product-id="{{ product.sku }}">—</button> 
+                <span class="product-qty" id="qty_{{ product.sku }}">0</span> 
+                <button class="btn-qty btn-add" 
+                        data-product-id="{{ product.sku }}" 
+                        data-name="{{ product.nome }}" 
+                        data-price-sats="{{ product.preco_sats }}">+</button> 
+            </div> 
+        </div> 
+    </div> 
+    {% empty %} 
+    <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px; font-size: 14px;"> 
+        Nenhuma oferta rápida ativa no painel administrativo no momento. 
+    </p> 
+    {% endfor %} 
+</div>
 
 {% endblock %}

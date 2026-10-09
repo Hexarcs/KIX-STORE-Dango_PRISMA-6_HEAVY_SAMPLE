@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- HEADER COM O BOTÃO DINÂMICO DA SOLUÇÃO 1 -->
+<header style="margin-bottom: 25px;">
+    {% if product.categoria %}
+        <!-- Se o produto tiver categoria vinculada, volta para a lista da categoria -->
+        <a href="{% url 'categoria_detalhe' product.categoria.slug %}" class="btn-back-store">
+            <span class="btn-icon">←</span> Voltar para {{ product.categoria.nome }}
+        </a>
+    {% else %}
+        <!-- Fallback: se o produto não tiver categoria, volta para a home -->
+        <a href="{% url 'home' %}" class="btn-back-store">
+            <span class="btn-icon">←</span> Voltar para o Início
+        </a>
+    {% endif %}
+</header>
+
+<style>
+.btn-back-store {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background-color: transparent;
+    color: #f7931a;
+    border: 1.5px solid #f7931a;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.25s ease-in-out;
+}
+
+.btn-back-store:hover {
+    background-color: #f7931a;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(247, 147, 26, 0.25);
+}
+
+.btn-back-store:hover .btn-icon {
+    transform: translateX(-3px);
+}
+
+.btn-icon {
+    transition: transform 0.2s ease;
+    font-size: 16px;
+}
+</style>
+
+<div class="product-detail-container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <!-- Imagem do Produto -->
+        <div class="product-detail-img" style="flex: 1; min-width: 280px; text-align: center;">
+            {% if product.imagem %}
+                <img src="{{ product.imagem.url }}" alt="{{ product.nome }}" style="max-width: 100%; border-radius: 8px;">
+            {% else %}
+                <div class="product-icon-fallback" style="font-size: 80px;">{{ product.icone|default:"📦" }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Informações do Produto -->
+        <div class="product-detail-info" style="flex: 1; min-width: 280px;">
+            <h1>{{ product.nome }}</h1>
+            <p style="color: #888; font-size: 12px;">SKU: {{ product.sku }}</p>
+
+            <div class="price-box" style="margin: 20px 0; padding: 15px; background: #222; border-radius: 8px; color: #fff;">
+                <div class="price-sats" style="font-size: 22px; font-weight: bold; color: #f7931a;">⚡ {{ product.preco_sats }} Sats</div>
+                <div class="price-brl" style="font-size: 13px; color: #ccc; margin-top: 5px;">
+                    Ref: R$ {{ product.preco_brl }} (+10% R$ {{ product.preco_pix_estatal }} - via PIX-estatal)
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="product-description" style="margin-bottom: 20px;">
+                <h3>Descrição do Produto</h3>
+                <p>{{ product.descricao|default:"Nenhuma descrição informada para este produto." }}</p>
+            </div>
+
+            <!-- Controles do Carrinho -->
+            <div class="cart-controls">
+                <button class="btn-qty btn-remove" data-product-id="{{ product.sku }}">—</button>
+                <span class="product-qty" id="qty_{{ product.sku }}">0</span>
+                <button class="btn-qty btn-add" 
+                        data-product-id="{{ product.sku }}" 
+                        data-name="{{ product.nome }}" 
+                        data-price-sats="{{ product.preco_sats }}">+</button>
+            </div>
+
+            <!-- BOTÃO ADICIONAL NO RODAPÉ -->
+            <div style="margin-top: 30px;">
+                {% if product.categoria %}
+                    <a href="{% url 'categoria_detalhe' product.categoria.slug %}" class="btn-back-store">
+                        <span class="btn-icon">←</span> Voltar para {{ product.categoria.nome }}
+                    </a>
+                {% else %}
+                    <a href="{% url 'home' %}" class="btn-back-store">
+                        <span class="btn-icon">←</span> Voltar para o Início
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
