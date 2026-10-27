@@ -69,8 +69,10 @@ COINAPI_KEY=suaapikeycoinsaqui
 LNBITS_API_KEY=suaapikeylnbitsaqui
 LNBITS_URL=https://seuendpointlnbitsaqui/api/v1/payments
 SECRET_KEY=django-insecure-suachavesecretadeaprendizadoaqui
-DEBUG=True
+DEBUG=False
 ALLOWED_HOSTS=*
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
 KIX_ENV_FILE
 
 echo "[OK] .env criado."
@@ -238,6 +240,8 @@ python manage.py makemigrations
 echo "[2/4] Executando migrate..."
 
 python manage.py migrate
+
+python manage.py collectstatic --noinput
 
 # ================================================================
 # 3. GARANTE SUPERUSUARIO
@@ -448,6 +452,8 @@ LNBITS_URL
 SECRET_KEY
 DEBUG
 ALLOWED_HOSTS
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
 ```
 
 As credenciais mostradas no script são apenas placeholders.
@@ -1118,3 +1124,51 @@ chmod +x deploy.sh
 ```
 
 **O `deploy.sh` passa a ser o script oficial de implantação da KIX Store.**
+
+---
+
+# 25. Formulário de contato via Telegram + estáticos em produção
+
+Esta versão adiciona um **formulário de contato no rodapé** que envia a mensagem
+diretamente para o Telegram do dono da loja, e prepara a aplicação para produção
+(`DEBUG=False`) usando **Whitenoise** para servir os arquivos estáticos.
+
+## Novas variáveis no `.env`
+
+```text
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
+```
+
+- `TELEGRAM_BOT_TOKEN` — token do bot criado no @BotFather.
+- `TELEGRAM_CHAT_ID` — ID do chat que receberá as mensagens (ex.: `862995447`).
+
+Essas variáveis têm prioridade sobre o painel admin. Se ficarem vazias, é possível
+configurar as mesmas credenciais em **Admin → "Configuração do Telegram"**.
+
+## Novas configurações no painel admin
+
+- **"Configuração do Telegram"** — credenciais (fallback do `.env`) e textos do
+  formulário (título, botão, mensagens de sucesso/erro). O campo `ativo` liga/desliga o form.
+- **"Configuração do Rodapé"** — dados da empresa (descrição curta, telefone(s),
+  e-mail, endereço, site principal) e redes sociais (Facebook, Instagram, YouTube, X).
+
+## Whitenoise e `collectstatic`
+
+Com `DEBUG=False` o Django **não** serve `/static/`. O **Whitenoise** passa a servir
+esses arquivos a partir de `staticfiles/`. Por isso, o `entrypoint.sh` executa:
+
+```bash
+python manage.py collectstatic --noinput
+```
+
+antes de iniciar o servidor.
+
+Já a mídia (`/media/` — imagens de produtos, logo etc.) continua sendo servida pelo
+Django (`core/urls.py`), pois o Whitenoise não cobre `/media/`.
+
+## O que muda no `deploy.sh`
+
+- O `.env` gerado agora inclui `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` (vazias).
+- O `entrypoint.sh` executa `collectstatic` antes do `runserver`.
+- `DEBUG` passa a ser `False` por padrão.

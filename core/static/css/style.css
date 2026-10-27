@@ -206,6 +206,11 @@ header { background-color: #1b834a; color: white; padding: 15px 5%; display: fle
 .footer-submit:hover {
     background-color: #146337;
 }
+.footer-form {
+    border: 1px solid rgba(0, 0, 0, 0.3); /* contorno preto leve e fixo (não varia com o tema) */
+    border-radius: 8px;
+    padding: 16px;
+}
 .footer-form .form-input {
     margin: 6px 0;
     padding: 10px;

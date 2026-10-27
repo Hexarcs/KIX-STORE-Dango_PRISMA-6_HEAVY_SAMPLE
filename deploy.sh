@@ -19,8 +19,10 @@ COINAPI_KEY=suaapikeycoinsaqui
 LNBITS_API_KEY=suaapikeylnbitsaqui
 LNBITS_URL=https://seuendpointlnbitsaqui/api/v1/payments
 SECRET_KEY=django-insecure-suachavesecretadeaprendizadoaqui
-DEBUG=True
+DEBUG=False
 ALLOWED_HOSTS=*
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
 EOF
 
 # ================================================================
@@ -76,6 +78,9 @@ except Exception as e:
 python manage.py makemigrations
 python manage.py migrate
 
+# Coleta os arquivos estáticos (whitenoise serve /static/ com DEBUG=False)
+python manage.py collectstatic --noinput
+
 # Garante superusuário ativo
 python -c "
 import os, django
@@ -119,7 +124,7 @@ services:
       - ./media:/app/media
       - ./entrypoint.sh:/app/entrypoint.sh
     environment:
-      - DEBUG=1
+      - DEBUG=0
       - DJANGO_SUPERUSER_USERNAME=admin
       - DJANGO_SUPERUSER_EMAIL=zeloko
       - DJANGO_SUPERUSER_PASSWORD=Industria12!
