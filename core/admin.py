@@ -141,3 +141,50 @@ class ConfiguracaoPixAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+from .models import ConfiguracaoTelegram, ConfiguracaoRodape
+
+@admin.register(ConfiguracaoTelegram)
+class ConfiguracaoTelegramAdmin(admin.ModelAdmin):
+    list_display = ('ativo', 'chat_id')
+
+    fieldsets = (
+        ('Credenciais (fallback do .env)', {
+            'fields': ('bot_token', 'chat_id')
+        }),
+        ('Formulário de Contato', {
+            'fields': ('ativo', 'titulo_form', 'texto_botao', 'mensagem_sucesso', 'mensagem_erro')
+        }),
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ConfiguracaoRodape)
+class ConfiguracaoRodapeAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ('Dados da Empresa', {
+            'fields': ('descricao_curta', 'endereco', 'site_principal', 'email_contato')
+        }),
+        ('Telefones', {
+            'fields': ('telefone_principal', 'outros_telefones')
+        }),
+        ('Redes Sociais', {
+            'fields': ('facebook_url', 'instagram_url', 'youtube_url', 'x_url')
+        }),
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False

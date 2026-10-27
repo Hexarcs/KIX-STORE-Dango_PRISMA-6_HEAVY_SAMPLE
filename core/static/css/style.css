@@ -136,3 +136,96 @@ header { background-color: #1b834a; color: white; padding: 15px 5%; display: fle
     display: block;
     margin-top: 10px;
 }
+
+/* RODAPÉ / FOOTER */
+.site-footer {
+    background: var(--bg-cards);
+    border-top: 1px solid var(--borda);
+    margin-top: 40px;
+    padding: 40px 5% 20px;
+}
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.footer-col h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--texto-principal);
+}
+.footer-col p {
+    font-size: 13px;
+    color: var(--texto-secundario);
+    margin: 6px 0;
+    line-height: 1.5;
+}
+.footer-desc {
+    font-size: 13px;
+}
+.footer-link {
+    display: inline-block;
+    color: #f7931a;
+    text-decoration: none;
+    font-size: 13px;
+    margin: 6px 0;
+    word-break: break-all;
+}
+.footer-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+.footer-social a {
+    background: var(--bg-inputs);
+    border: 1px solid var(--borda);
+    color: var(--texto-principal);
+    text-decoration: none;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: 0.2s;
+}
+.footer-social a:hover {
+    border-color: #1b834a;
+}
+.footer-submit {
+    background-color: #1b834a;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: 0.2s;
+}
+.footer-submit:hover {
+    background-color: #146337;
+}
+.footer-form .form-input {
+    margin: 6px 0;
+    padding: 10px;
+}
+.footer-form-status {
+    font-size: 13px;
+    margin-top: 8px;
+    min-height: 18px;
+}
+.footer-form-status.success {
+    color: #27ae60;
+}
+.footer-form-status.error {
+    color: #e74c3c;
+}
+.footer-bottom {
+    text-align: center;
+    border-top: 1px solid var(--borda);
+    margin-top: 30px;
+    padding-top: 16px;
+    font-size: 12px;
+    color: var(--texto-secundario);
+}

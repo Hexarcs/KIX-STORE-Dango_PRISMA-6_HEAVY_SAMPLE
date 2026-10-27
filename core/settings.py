@@ -15,6 +15,12 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+# Configurações do Telegram (notificações de contato do rodapé)
+# Prioridade: .env; se vazio, usa ConfiguracaoTelegram (painel admin).
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
+TELEGRAM_TIMEOUT = 10
+
 # ⚡ OBRIGATÓRIO PARA HTTPS: Permite requisições POST (como o add do carrinho) vindas do seu domínio
 CSRF_TRUSTED_ORIGINS = [
     'https://engine-99.libertariamemes.com.br',
@@ -75,9 +81,11 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 # ADICIONE ESTA LINHA AQUI:
-                'core.context_processors.btc_context',    
-                'core.context_processors.site_config_processor', 
-                'core.context_processors.cards_processor',  # <--- Este aqui            
+                'core.context_processors.btc_context',
+                'core.context_processors.site_config_processor',
+                'core.context_processors.cards_processor',  # <--- Este aqui
+                'core.context_processors.telegram_config_processor',
+                'core.context_processors.rodape_config_processor',
             ],
         },
     },
@@ -188,5 +196,48 @@ import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ########---------------------------------------------------##############
+
+
+# =========================================================================
+# LOGGING: faz os logs da aplicação (ex.: falhas no Telegram) aparecerem
+# =========================================================================
+LOG_DIR = BASE_DIR / "logs"
+
+# O handler de arquivo só é ativado se o diretório for gravável pelo usuário
+# atual. Assim, uma permissão de escrita ausente não derruba a aplicação nem
+# polui o console com erros de logging.
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+    _arquivo_log_ok = os.access(LOG_DIR, os.W_OK)
+except OSError:
+    _arquivo_log_ok = False
+
+_file_handlers = ["console"]
+if _arquivo_log_ok:
+    _file_handlers.append("file")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {"format": "{asctime} {levelname} {name} {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(LOG_DIR / "app.log"),
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 3,
+            "formatter": "verbose",
+            # Abre o arquivo só no primeiro log (não derruba o startup se não puder escrever)
+            "delay": True,
+        },
+    },
+    "root": {"handlers": _file_handlers, "level": "INFO"},
+    "loggers": {
+        "core": {"handlers": _file_handlers, "level": "DEBUG", "propagate": False},
+    },
+}
 
 

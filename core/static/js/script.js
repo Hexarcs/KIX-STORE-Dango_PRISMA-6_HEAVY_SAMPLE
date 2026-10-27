@@ -505,3 +505,57 @@ if (btnConfirmMock) {
 document.addEventListener("DOMContentLoaded", () => {
     fetchCartStatus();
 });
+
+
+// ==========================================
+// 8. FORMULÁRIO DE CONTATO (RODAPÉ) -> TELEGRAM
+// ==========================================
+const contactForm = document.getElementById('contact-form');
+if (contactForm && !contactForm.dataset.bound) {
+    // Evita bind duplicado (o script.js é carregado duas vezes na página)
+    contactForm.dataset.bound = '1';
+
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const statusEl = document.getElementById('contact-form-status');
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const endpoint = contactForm.dataset.endpoint || '/send_telegram';
+        const formData = new FormData(contactForm);
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (statusEl) {
+            statusEl.textContent = '';
+            statusEl.className = 'footer-form-status';
+        }
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': window.csrfToken },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (statusEl) {
+                statusEl.textContent = result.message || '';
+                statusEl.className = result.status === 'success'
+                    ? 'footer-form-status success'
+                    : 'footer-form-status error';
+            }
+
+            if (result.status === 'success') {
+                contactForm.reset();
+            }
+        } catch (err) {
+            console.error('Erro ao enviar contato:', err);
+            if (statusEl) {
+                statusEl.textContent = 'Não foi possível enviar sua mensagem. Tente novamente.';
+                statusEl.className = 'footer-form-status error';
+            }
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    });
+}

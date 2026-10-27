@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import timedelta
 from django.http import JsonResponse
@@ -12,8 +13,14 @@ from dotenv import load_dotenv
 from .cart import KixCart
 from .models import CotacaoBitcoin, Produto, Categoria, HomeConfig, MacroCategoria
 from .forms import ProfileForm
+from .services.executor import (
+    send_contact_telegram_notification,
+    TelegramNotificationError,
+)
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 # def home(request):
@@ -293,3 +300,61 @@ def obter_carrinho_api(request):
 def produto_detalhe(request, sku):
     product = get_object_or_404(Produto, sku=sku)
     return render(request, 'produto_detalhe.html', {'product': product})
+
+
+# =========================================================================
+# FORMULÁRIO DE CONTATO (RODAPÉ) -> TELEGRAM
+# =========================================================================
+
+MAX_FIELD_LENGTH = 200
+MAX_MESSAGE_LENGTH = 5000
+
+
+@require_POST
+def send_telegram(request):
+    """Recebe os dados do formulário de contato e notifica o dono via Telegram.
+
+    A notificação é best-effort: se o Telegram falhar, loga e responde sucesso
+    mesmo assim, para não quebrar a experiência do visitante.
+    """
+    name = (request.POST.get("name") or "").strip()
+    email = (request.POST.get("email") or "").strip()
+    telegram = (request.POST.get("telegram") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+
+    missing = []
+    if not name:
+        missing.append("Nome")
+    if not email:
+        missing.append("E-mail")
+    elif "@" not in email or "." not in email.split("@")[-1]:
+        return JsonResponse(
+            {"status": "error", "message": "Informe um e-mail válido."},
+            status=400,
+        )
+    if not message:
+        missing.append("Mensagem")
+
+    if missing:
+        return JsonResponse(
+            {"status": "error",
+             "message": f"Preencha o(s) campo(s): {', '.join(missing)}."},
+            status=400,
+        )
+
+    name = name[:MAX_FIELD_LENGTH]
+    email = email[:MAX_FIELD_LENGTH]
+    telegram = telegram[:MAX_FIELD_LENGTH]
+    message = message[:MAX_MESSAGE_LENGTH]
+
+    try:
+        send_contact_telegram_notification(name, email, telegram, message)
+    except TelegramNotificationError:
+        logger.exception("Falha ao enviar notificação Telegram do contato.")
+    except Exception:
+        logger.exception("Erro inesperado ao notificar o Telegram.")
+
+    return JsonResponse({
+        "status": "success",
+        "message": "Mensagem enviada via Telegram! Em breve entraremos em contato.",
+    })

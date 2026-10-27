@@ -299,3 +299,127 @@ class ConfiguracaoPix(models.Model):
     def __str__(self):
         return f"Configuração PIX ({self.chave_pix})"
 
+
+# =========================================================================
+# CONFIGURAÇÃO DO TELEGRAM (NOTIFICAÇÕES DE CONTATO)
+# =========================================================================
+
+class ConfiguracaoTelegram(models.Model):
+    """Credenciais e textos do formulário de contato que envia via Telegram.
+
+    As credenciais também podem vir do .env (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID),
+    que têm prioridade sobre o que estiver salvo aqui.
+    """
+    bot_token = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Token do Bot (chave)",
+        help_text="Token do bot criado no @BotFather. Deixe em branco para usar o valor do .env."
+    )
+    chat_id = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Chat ID / Sessão (destino)",
+        help_text="ID da conversa que receberá as mensagens (ex.: 862995447). Deixe em branco para usar o valor do .env."
+    )
+    ativo = models.BooleanField(
+        default=True,
+        verbose_name="Exibir formulário de contato no rodapé"
+    )
+    titulo_form = models.CharField(
+        max_length=100,
+        default="Fale Conosco",
+        verbose_name="Título do formulário"
+    )
+    texto_botao = models.CharField(
+        max_length=50,
+        default="Enviar mensagem",
+        verbose_name="Texto do botão"
+    )
+    mensagem_sucesso = models.CharField(
+        max_length=200,
+        default="Mensagem enviada! Em breve entraremos em contato.",
+        verbose_name="Mensagem de sucesso"
+    )
+    mensagem_erro = models.CharField(
+        max_length=200,
+        default="Não foi possível enviar sua mensagem. Tente novamente.",
+        verbose_name="Mensagem de erro"
+    )
+
+    class Meta:
+        verbose_name = "Configuração do Telegram"
+        verbose_name_plural = "Configuração do Telegram"
+
+    def save(self, *args, **kwargs):
+        # Singleton: sempre edita a mesma linha (pk=1)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configuração do Telegram (contato)"
+
+
+# =========================================================================
+# CONFIGURAÇÃO DO RODAPÉ (DADOS DA EMPRESA)
+# =========================================================================
+
+class ConfiguracaoRodape(models.Model):
+    """Dados da empresa exibidos no rodapé do site."""
+    descricao_curta = models.TextField(
+        blank=True,
+        verbose_name="Descrição curta da empresa"
+    )
+    telefone_principal = models.CharField(
+        max_length=30,
+        blank=True,
+        verbose_name="Telefone principal"
+    )
+    outros_telefones = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name="Outros telefones de contato",
+        help_text="Separe por vírgula se houver mais de um."
+    )
+    email_contato = models.CharField(
+        max_length=150,
+        blank=True,
+        verbose_name="E-mail de contato"
+    )
+    endereco = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Endereço"
+    )
+    site_principal = models.URLField(
+        max_length=255,
+        blank=True,
+        verbose_name="Site principal"
+    )
+    facebook_url = models.URLField(max_length=255, blank=True, verbose_name="Facebook")
+    instagram_url = models.URLField(max_length=255, blank=True, verbose_name="Instagram")
+    youtube_url = models.URLField(max_length=255, blank=True, verbose_name="YouTube")
+    x_url = models.URLField(max_length=255, blank=True, verbose_name="X (Twitter)")
+
+    class Meta:
+        verbose_name = "Configuração do Rodapé"
+        verbose_name_plural = "Configuração do Rodapé"
+
+    def save(self, *args, **kwargs):
+        # Singleton: sempre edita a mesma linha (pk=1)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configuração do Rodapé"
+

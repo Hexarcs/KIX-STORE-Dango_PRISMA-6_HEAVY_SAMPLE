@@ -28,6 +28,9 @@ urlpatterns = [
     path('categoria/<slug:slug>/', views.detalhe_categoria, name='categoria_detalhe'),
     path('cart/summary/', views.obter_carrinho_api, name='cart_summary'),
     path('produto/<str:sku>/', views.produto_detalhe, name='produto_detalhe'),
+
+    # Formulário de contato (rodapé) -> notificação via Telegram
+    path('send_telegram', views.send_telegram, name='send_telegram'),
 ]
 
 if settings.DEBUG:

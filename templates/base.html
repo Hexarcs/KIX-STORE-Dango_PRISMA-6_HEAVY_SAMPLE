@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
     <link rel="icon" type="image/png" href="{% static 'img/favicon_cart_kix.png' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ site_config.meta_title }}</title>
@@ -10,7 +10,7 @@
     <script>
         window.csrfToken = "{{ csrf_token }}";
     </script>
-    <script src="{% static 'js/script.js' %}" defer></script>
+    <script src="{% static 'js/script.js' %}?v=2" defer></script>
     <style>
 
 /* 1. Controla a grade para que 1 único card NÃO ocupe a tela inteira */
@@ -282,9 +282,78 @@
 
         </div>
     </div>
+    <footer class="site-footer">
+        <div class="footer-container">
+
+            <!-- Coluna 1: Sobre a empresa -->
+            <div class="footer-col footer-about">
+                <h3>{{ site_config.nome_loja }}</h3>
+                {% if rodape_config.descricao_curta %}
+                    <p class="footer-desc">{{ rodape_config.descricao_curta }}</p>
+                {% endif %}
+
+                {% if rodape_config.site_principal %}
+                    <a class="footer-link" href="{{ rodape_config.site_principal }}" target="_blank" rel="noopener">🌐 {{ rodape_config.site_principal }}</a>
+                {% endif %}
+
+                <div class="footer-social">
+                    {% if rodape_config.facebook_url %}
+                        <a href="{{ rodape_config.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook">Facebook</a>
+                    {% endif %}
+                    {% if rodape_config.instagram_url %}
+                        <a href="{{ rodape_config.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram">Instagram</a>
+                    {% endif %}
+                    {% if rodape_config.youtube_url %}
+                        <a href="{{ rodape_config.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube">YouTube</a>
+                    {% endif %}
+                    {% if rodape_config.x_url %}
+                        <a href="{{ rodape_config.x_url }}" target="_blank" rel="noopener" aria-label="X">X</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Coluna 2: Contato -->
+            <div class="footer-col footer-contact">
+                <h3>Contato</h3>
+                {% if rodape_config.telefone_principal %}
+                    <p>📞 {{ rodape_config.telefone_principal }}</p>
+                {% endif %}
+                {% if rodape_config.outros_telefones %}
+                    <p>📱 {{ rodape_config.outros_telefones }}</p>
+                {% endif %}
+                {% if rodape_config.email_contato %}
+                    <p>✉️ {{ rodape_config.email_contato }}</p>
+                {% endif %}
+                {% if rodape_config.endereco %}
+                    <p>📍 {{ rodape_config.endereco }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Coluna 3: Formulário de contato -->
+            {% if telegram_config.ativo %}
+            <div class="footer-col footer-form">
+                <h3>{{ telegram_config.titulo_form }}</h3>
+                <form id="contact-form" data-endpoint="/send_telegram">
+                    {% csrf_token %}
+                    <input class="form-input" type="text" name="name" placeholder="Seu nome" required>
+                    <input class="form-input" type="email" name="email" placeholder="Seu e-mail" required>
+                    <input class="form-input" type="text" name="telegram" placeholder="Telegram/WhatsApp (opcional)">
+                    <textarea class="form-input" name="message" rows="4" placeholder="Sua mensagem" required></textarea>
+                    <button type="submit" class="footer-submit">{{ telegram_config.texto_botao }}</button>
+                </form>
+                <p id="contact-form-status" class="footer-form-status"></p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="footer-bottom">
+            <p>© {{ site_config.nome_loja }}</p>
+        </div>
+    </footer>
+
     <input type="hidden" id="btc-price-hidden" value="{{ btc_preco|stringformat:".2f" }}">
 
-    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}?v=2"></script>
 </body>
 </html>
 
