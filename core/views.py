@@ -109,14 +109,23 @@ def home(request):
 @require_POST
 def cart_add(request):
     cart = KixCart(request)
-    product_id = request.POST.get("product_id")
-    name = request.POST.get("name")
-    price_sats = request.POST.get("price_sats")
+    product_id = request.POST.get("product_id")  # product_id = SKU do produto
 
-    if not product_id or not price_sats:
-        return JsonResponse({"error": "Dados inválidos ou incompletos."}, status=400)
+    if not product_id:
+        return JsonResponse({"error": "Produto não informado."}, status=400)
 
-    cart.add(product_id=product_id, name=name, price_sats=price_sats)
+    # Preço e nome SEMPRE vêm do banco, nunca do navegador.
+    # (evita manipulação de preço no checkout / injeção no nome)
+    try:
+        produto = Produto.objects.get(sku=product_id)
+    except Produto.DoesNotExist:
+        return JsonResponse({"error": "Produto não encontrado."}, status=404)
+
+    cart.add(
+        product_id=produto.sku,
+        name=produto.nome,
+        price_sats=produto.preco_sats,
+    )
 
     return JsonResponse({
         "total_items": cart.get_total_items(),

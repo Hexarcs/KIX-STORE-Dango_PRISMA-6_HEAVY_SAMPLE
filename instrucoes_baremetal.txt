@@ -1,0 +1,8 @@
+nao esquecer de criar o .env
+
+COINAPI_KEY=3e97fe7f-44be-4fec-939c-e59a9342703b
+LNBITS_API_KEY=
+LNBITS_URL=
+SECRET_KEY=
+DEBUG=True
+ALLOWED_HOSTS=*,engine-99.libertariamemes.com.br,supermercado.hexarcs.com.br,supermercado.hexarcs.com
