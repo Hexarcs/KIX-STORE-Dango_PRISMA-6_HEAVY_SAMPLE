@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
     <link rel="icon" type="image/png" href="{% static 'img/favicon_cart_kix.png' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ site_config.meta_title }}</title>
@@ -10,7 +10,7 @@
     <script>
         window.csrfToken = "{{ csrf_token }}";
     </script>
-    <script src="{% static 'js/script.js' %}?v=2" defer></script>
+    <script src="{% static 'js/script.js' %}?v=4" defer></script>
     <style>
 
 /* 1. Controla a grade para que 1 único card NÃO ocupe a tela inteira */
@@ -379,8 +379,6 @@
     </footer>
 
     <input type="hidden" id="btc-price-hidden" value="{{ btc_preco|stringformat:".2f" }}">
-
-    <script src="{% static 'js/script.js' %}?v=2"></script>
 
     {% if whatsapp_config.ativo %}
     <a href="{{ whatsapp_config.url }}" target="_blank" rel="noopener noreferrer" class="whatsapp-float" aria-label="Fale conosco no WhatsApp" title="Fale conosco no WhatsApp">

@@ -93,11 +93,16 @@
             </div> 
         </div> 
     </div> 
-    {% empty %} 
-    <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px; font-size: 14px;"> 
-        Nenhuma oferta rápida ativa no painel administrativo no momento. 
-    </p> 
-    {% endfor %} 
+    {% empty %}
+    {% if not servicos_promo %}
+    <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px; font-size: 14px;">
+        Nenhuma oferta rápida ativa no painel administrativo no momento.
+    </p>
+    {% endif %}
+    {% endfor %}
+    {% for servico in servicos_promo %}
+        {% include 'servico_card.html' %}
+    {% endfor %}
 </div>
 
 {% endblock %}

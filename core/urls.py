@@ -32,6 +32,9 @@ urlpatterns = [
 
     # Formulário de contato (rodapé) -> notificação via Telegram
     path('send_telegram', views.send_telegram, name='send_telegram'),
+
+    # Interesse em serviço (assessoria/concierge) -> Telegram ou WhatsApp
+    path('servico/interesse/', views.servico_interesse, name='servico_interesse'),
 ]
 
 # Serve a mídia (imagens de produtos, logo etc.) SEMPRE: o whitenoise cuida de

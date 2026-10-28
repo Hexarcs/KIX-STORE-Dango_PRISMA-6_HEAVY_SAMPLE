@@ -2,6 +2,8 @@ import json
 import logging
 import os
 from datetime import timedelta
+from urllib.parse import quote
+from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
@@ -11,10 +13,11 @@ import requests
 from dotenv import load_dotenv
 
 from .cart import KixCart
-from .models import CotacaoBitcoin, Produto, Categoria, HomeConfig, MacroCategoria
+from .models import CotacaoBitcoin, Produto, Categoria, HomeConfig, MacroCategoria, Servico, ConfiguracaoWhatsApp
 from .forms import ProfileForm
 from .services.executor import (
     send_contact_telegram_notification,
+    send_telegram_message,
     TelegramNotificationError,
 )
 
@@ -100,11 +103,13 @@ def home(request):
             print(f"Erro ao buscar cotação na Binance: {e}")
 
     produtos_vitrine = Produto.objects.filter(is_promo=True)[:4]
+    servicos_promo = Servico.objects.filter(is_promo=True)
     hero_config = HomeConfig.objects.filter(ativo=True).first()
     macro_categorias = MacroCategoria.objects.filter(ativo=True).order_by('ordem')
 
     context = {
         "products": produtos_vitrine,
+        "servicos_promo": servicos_promo,
         "btc_preco": registro_cotacao.preco_brl if registro_cotacao else None,
         "ultima_checagem": registro_cotacao.ultima_atualizacao if registro_cotacao else None,
         "hero_config": hero_config,
@@ -243,7 +248,8 @@ def check_lightning_payment(request):
 
 def categoria_detalhe(request, nome):
     produtos = Produto.objects.filter(categoria__slug=nome)
-    return render(request, 'categoria.html', {'nome': nome, 'produtos': produtos})
+    servicos = Servico.objects.filter(categoria__slug=nome)
+    return render(request, 'categoria.html', {'nome': nome, 'produtos': produtos, 'servicos': servicos})
 
 
 @login_required
@@ -357,4 +363,102 @@ def send_telegram(request):
     return JsonResponse({
         "status": "success",
         "message": "Mensagem enviada via Telegram! Em breve entraremos em contato.",
+    })
+
+
+# =========================================================================
+# INTERESSE EM SERVIÇO (ASSESSORIA/CONCIERGE) -> TELEGRAM OU WHATSAPP
+# =========================================================================
+
+def _whatsapp_numero():
+    """Número efetivo do WhatsApp (banco tem prioridade; .env é fallback).
+
+    Mantém a mesma regra do whatsapp_config_processor para reaproveitar o
+    número configurado no botão flutuante.
+    """
+    config = ConfiguracaoWhatsApp.get_solo()
+    numero = ''.join(ch for ch in (config.numero or '') if ch.isdigit())
+    if not numero:
+        numero = ''.join(ch for ch in (getattr(settings, 'WHATSAPP_NUMERO', '') or '') if ch.isdigit())
+    return numero
+
+
+@require_POST
+def servico_interesse(request):
+    """Recebe a mensagem de interesse em um serviço e dispara o contato.
+
+    - canal=whatsapp: devolve a URL click-to-chat para o front abrir em nova aba.
+    - canal=telegram: envia a mensagem ao dono via bot (ConfiguracaoTelegram/.env).
+    """
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, AttributeError):
+        data = request.POST
+
+    servico_id = data.get('servico_id') or request.POST.get('servico_id')
+    canal = (data.get('canal') or request.POST.get('canal') or '').strip()
+    mensagem = (data.get('mensagem') or request.POST.get('mensagem') or '').strip()
+
+    if not servico_id or not mensagem:
+        return JsonResponse(
+            {"status": "error", "message": "Informe o serviço e a mensagem."},
+            status=400,
+        )
+
+    if canal not in ('whatsapp', 'telegram'):
+        return JsonResponse(
+            {"status": "error", "message": "Canal de contato inválido."},
+            status=400,
+        )
+
+    try:
+        servico = Servico.objects.get(pk=servico_id)
+    except (Servico.DoesNotExist, ValueError):
+        return JsonResponse(
+            {"status": "error", "message": "Serviço não encontrado."},
+            status=404,
+        )
+
+    mensagem = mensagem[:MAX_MESSAGE_LENGTH]
+
+    if canal == 'whatsapp':
+        if not servico.whatsapp_ativo:
+            return JsonResponse(
+                {"status": "error", "message": "Este serviço não está habilitado para WhatsApp."},
+                status=400,
+            )
+        numero = _whatsapp_numero()
+        if not numero:
+            return JsonResponse(
+                {"status": "error", "message": "WhatsApp da loja não configurado."},
+                status=400,
+            )
+        url = f"https://api.whatsapp.com/send?phone={numero}&text={quote(mensagem, safe='')}"
+        return JsonResponse({"status": "success", "canal": "whatsapp", "url": url})
+
+    # Telegram
+    if not servico.telegram_ativo:
+        return JsonResponse(
+            {"status": "error", "message": "Este serviço não está habilitado para Telegram."},
+            status=400,
+        )
+    texto = (
+        "📬 Interesse em serviço\n"
+        "──────────────────────────\n"
+        f"🏷️ Serviço: {servico.nome}\n"
+        f"💬 Mensagem: {mensagem}"
+    )
+    try:
+        send_telegram_message(texto)
+    except TelegramNotificationError:
+        logger.exception("Falha ao notificar Telegram sobre interesse em serviço.")
+        return JsonResponse(
+            {"status": "error", "message": "Não foi possível enviar agora. Tente novamente."},
+            status=502,
+        )
+
+    return JsonResponse({
+        "status": "success",
+        "canal": "telegram",
+        "message": "Mensagem enviada! Em breve entraremos em contato.",
     })

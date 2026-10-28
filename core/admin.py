@@ -209,3 +209,13 @@ class ConfiguracaoWhatsAppAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+from .models import Servico
+
+@admin.register(Servico)
+class ServicoAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'categoria', 'is_promo', 'whatsapp_ativo', 'telegram_ativo')
+    list_editable = ('is_promo', 'categoria', 'whatsapp_ativo', 'telegram_ativo')
+    list_filter = ('is_promo', 'categoria')
+    search_fields = ('nome',)

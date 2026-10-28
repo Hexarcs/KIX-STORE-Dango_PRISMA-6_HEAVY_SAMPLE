@@ -559,3 +559,83 @@ if (contactForm && !contactForm.dataset.bound) {
         }
     });
 }
+
+
+// ==========================================
+// 9. SERVIÇOS (ASSESSORIA/CONCIERGE) - INTERESSE
+// ==========================================
+document.querySelectorAll('.service-card').forEach(card => {
+    const interesseBtn = card.querySelector('.btn-servico-interesse');
+    const box = card.querySelector('.service-interest-box');
+    const textarea = card.querySelector('.service-message');
+    const statusEl = card.querySelector('.service-status');
+
+    if (!interesseBtn || !box || !textarea) return;
+
+    interesseBtn.addEventListener('click', () => {
+        const hidden = box.style.display === 'none' || box.style.display === '';
+        box.style.display = hidden ? 'flex' : 'none';
+    });
+
+    card.querySelectorAll('.btn-servico-enviar').forEach(enviarBtn => {
+        enviarBtn.addEventListener('click', function() {
+            const servicoId = card.getAttribute('data-servico-id');
+            const canal = this.getAttribute('data-canal');
+            const mensagem = textarea.value.trim();
+
+            if (!mensagem) {
+                if (statusEl) {
+                    statusEl.textContent = 'Escreva uma mensagem antes de enviar.';
+                    statusEl.className = 'service-status error';
+                }
+                return;
+            }
+
+            this.disabled = true;
+
+            fetch('/servico/interesse/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.csrfToken
+                },
+                body: JSON.stringify({ servico_id: servicoId, mensagem: mensagem, canal: canal })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.disabled = false;
+
+                if (data.status === 'success') {
+                    if (data.url) {
+                        // WhatsApp: abre o click-to-chat em nova aba
+                        window.open(data.url, '_blank', 'noopener,noreferrer');
+                        if (statusEl) {
+                            statusEl.textContent = 'Abrindo WhatsApp...';
+                            statusEl.className = 'service-status success';
+                        }
+                    } else {
+                        // Telegram: mensagem enviada ao dono
+                        if (statusEl) {
+                            statusEl.textContent = data.message || 'Enviado!';
+                            statusEl.className = 'service-status success';
+                        }
+                        textarea.value = '';
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.textContent = data.message || 'Erro ao enviar.';
+                        statusEl.className = 'service-status error';
+                    }
+                }
+            })
+            .catch(err => {
+                this.disabled = false;
+                console.error('Erro ao enviar interesse no serviço:', err);
+                if (statusEl) {
+                    statusEl.textContent = 'Erro de conexão. Tente novamente.';
+                    statusEl.className = 'service-status error';
+                }
+            });
+        });
+    });
+});

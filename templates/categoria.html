@@ -78,9 +78,14 @@
         </div>
     </div>
     {% empty %}
+    {% if not servicos %}
         <p style="grid-column: 1 / -1; text-align: center; color: var(--texto-secundario); padding: 30px;">
             Nenhum produto encontrado nesta categoria.
         </p>
+    {% endif %}
+    {% endfor %}
+    {% for servico in servicos %}
+        {% include 'servico_card.html' %}
     {% endfor %}
 </div>
 

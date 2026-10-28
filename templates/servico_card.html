@@ -1,0 +1,28 @@
+<div class="service-card" data-servico-id="{{ servico.id }}">
+    <div>
+        <div class="service-img">
+            {% if servico.imagem %}
+                <img src="{{ servico.imagem.url }}" alt="{{ servico.nome }}">
+            {% else %}
+                <div class="product-icon-fallback">{{ servico.icone|default:"🤝" }}</div>
+            {% endif %}
+        </div>
+        <div class="service-name">{{ servico.nome }}</div>
+        {% if servico.descricao %}
+            <div class="service-desc">{{ servico.descricao }}</div>
+        {% endif %}
+    </div>
+
+    <button class="btn-servico-interesse" type="button">💬 Tenho interesse</button>
+
+    <div class="service-interest-box" style="display: none;">
+        <textarea class="service-message" rows="3" placeholder="Escreva sua mensagem...">{{ servico.mensagem_padrao }}</textarea>
+        {% if servico.whatsapp_ativo %}
+            <button class="btn-servico-enviar btn-servico-whatsapp" type="button" data-canal="whatsapp">📱 Enviar via WhatsApp</button>
+        {% endif %}
+        {% if servico.telegram_ativo %}
+            <button class="btn-servico-enviar btn-servico-telegram" type="button" data-canal="telegram">✈️ Enviar via Telegram</button>
+        {% endif %}
+        <span class="service-status"></span>
+    </div>
+</div>

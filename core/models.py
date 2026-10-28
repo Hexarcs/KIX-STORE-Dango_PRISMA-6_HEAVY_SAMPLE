@@ -471,3 +471,65 @@ class ConfiguracaoWhatsApp(models.Model):
     def __str__(self):
         return "Configuração do WhatsApp (botão flutuante)"
 
+
+# =========================================================================
+# SERVIÇOS (ASSESSORIA / CONCIERGE)
+# =========================================================================
+
+class Servico(models.Model):
+    """Serviço ofertado na vitrine (ex.: assessoria/concierge).
+
+    Não entra no carrinho: o cliente demonstra interesse por uma mensagem
+    enviada via Telegram e/ou WhatsApp (canais configuráveis por serviço).
+    """
+    nome = models.CharField(max_length=255, verbose_name="Nome do serviço")
+    descricao = models.TextField(blank=True, null=True, verbose_name="Descrição do Serviço")
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='servicos',
+        verbose_name="Categoria",
+    )
+    icone = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        verbose_name="Ícone (emoji)",
+        help_text="Emoji exibido quando não há imagem (ex.: 🤝, 💼).",
+    )
+    imagem = models.ImageField(
+        upload_to="servicos/",
+        blank=True,
+        null=True,
+        verbose_name="Imagem do Serviço",
+    )
+    is_promo = models.BooleanField(
+        default=False,
+        verbose_name="Exibir nas Ofertas Rápidas (Home)",
+    )
+    whatsapp_ativo = models.BooleanField(
+        default=False,
+        verbose_name="Contato via WhatsApp",
+        help_text="Habilita o botão de envio por WhatsApp no card.",
+    )
+    telegram_ativo = models.BooleanField(
+        default=True,
+        verbose_name="Contato via Telegram",
+        help_text="Habilita o botão de envio por Telegram no card.",
+    )
+    mensagem_padrao = models.CharField(
+        max_length=500,
+        default="olá eu tenho interesse no serviço",
+        verbose_name="Mensagem padrão",
+        help_text="Texto pré-preenchido na caixa de interesse (editável pelo cliente).",
+    )
+
+    class Meta:
+        verbose_name = "Serviço"
+        verbose_name_plural = "Serviços"
+
+    def __str__(self):
+        return self.nome
+
