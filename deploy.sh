@@ -23,6 +23,9 @@ DEBUG=False
 ALLOWED_HOSTS=*
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+WHATSAPP_ATIVO=false
+WHATSAPP_NUMERO=
+WHATSAPP_MENSAGEM_PADRAO=Olá
 EOF
 
 # ================================================================

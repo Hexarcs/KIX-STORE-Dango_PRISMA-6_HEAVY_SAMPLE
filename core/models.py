@@ -423,3 +423,51 @@ class ConfiguracaoRodape(models.Model):
     def __str__(self):
         return "Configuração do Rodapé"
 
+
+# =========================================================================
+# CONFIGURAÇÃO DO WHATSAPP (BOTÃO FLUTUANTE "CLICK-TO-CHAT")
+# =========================================================================
+
+class ConfiguracaoWhatsApp(models.Model):
+    """Configurações do botão flutuante de WhatsApp.
+
+    Cada campo tem prioridade no painel admin; quando vazio no banco, o
+    valor é lido como fallback das variáveis de ambiente WHATSAPP_ATIVO,
+    WHATSAPP_NUMERO e WHATSAPP_MENSAGEM_PADRAO definidas no .env.
+    """
+    ativo = models.BooleanField(
+        default=False,
+        verbose_name="Exibir botão flutuante",
+        help_text="Liga/desliga o botão no site.",
+    )
+    numero = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Número (DDI + DDD + número)",
+        help_text="Somente dígitos, ex.: 5531993791730. Deixe em branco para usar o .env.",
+    )
+    mensagem_padrao = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Mensagem padrão",
+        help_text="Texto enviado ao abrir a conversa. Deixe em branco para usar o .env ou o padrão 'Olá'.",
+    )
+
+    class Meta:
+        verbose_name = "Configuração do WhatsApp"
+        verbose_name_plural = "Configuração do WhatsApp"
+
+    def save(self, *args, **kwargs):
+        # Singleton: sempre edita a mesma linha (pk=1)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configuração do WhatsApp (botão flutuante)"
+

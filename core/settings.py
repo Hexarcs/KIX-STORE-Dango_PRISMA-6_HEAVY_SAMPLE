@@ -21,6 +21,13 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 TELEGRAM_TIMEOUT = 10
 
+# Configurações do botão flutuante de WhatsApp (Click-to-Chat)
+# Prioridade: painel admin (ConfiguracaoWhatsApp); o .env é fallback quando o
+# campo correspondente estiver vazio no banco.
+WHATSAPP_ATIVO = os.getenv('WHATSAPP_ATIVO', '')
+WHATSAPP_NUMERO = os.getenv('WHATSAPP_NUMERO', '')
+WHATSAPP_MENSAGEM_PADRAO = os.getenv('WHATSAPP_MENSAGEM_PADRAO', 'Olá')
+
 # ⚡ OBRIGATÓRIO PARA HTTPS: Permite requisições POST (como o add do carrinho) vindas do seu domínio
 CSRF_TRUSTED_ORIGINS = [
     'https://engine-99.libertariamemes.com.br',
@@ -87,6 +94,7 @@ TEMPLATES = [
                 'core.context_processors.cards_processor',  # <--- Este aqui
                 'core.context_processors.telegram_config_processor',
                 'core.context_processors.rodape_config_processor',
+                'core.context_processors.whatsapp_config_processor',
             ],
         },
     },

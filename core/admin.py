@@ -188,3 +188,24 @@ class ConfiguracaoRodapeAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+from .models import ConfiguracaoWhatsApp
+
+@admin.register(ConfiguracaoWhatsApp)
+class ConfiguracaoWhatsAppAdmin(admin.ModelAdmin):
+    list_display = ('ativo', 'numero', 'mensagem_padrao')
+
+    fieldsets = (
+        ('Botão Flutuante (Click-to-Chat)', {
+            'fields': ('ativo', 'numero', 'mensagem_padrao')
+        }),
+    )
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
